@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Animal Knowledge Base</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="logo">🐾</div>
+      <div class="title-wrap">
+        <h1>Амьтны менежментийн мэдлэгийн сан</h1>
+        <p>Prolog Knowledge Base Dashboard • бүх төрөл, эрүүл мэнд, хоол тэжээл, нийцтэй байдал, query</p>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab active" onclick="switchTab(this,'overview')">Ерөнхий</button>
+      <button class="tab" onclick="switchTab(this,'animals')">Амьтад</button>
+      <button class="tab" onclick="switchTab(this,'health')">Эрүүл мэнд</button>
+      <button class="tab" onclick="switchTab(this,'food')">Хоол тэжээл</button>
+      <button class="tab" onclick="switchTab(this,'compat')">Нийцтэй байдал</button>
+      <button class="tab" onclick="switchTab(this,'query')">Query шалгах</button>
+    </nav>
+
+    <!-- OVERVIEW -->
+    <div id="overview" class="panel active">
+      <div class="grid">
+        <div class="card"><div class="metric" id="totalAnimals">0</div><div class="metric-label">Нийт амьтан</div></div>
+        <div class="card"><div class="metric" id="totalSpecies">0</div><div class="metric-label">Төрөл зүйл</div></div>
+        <div class="card"><div class="metric" id="totalFacts">0+</div><div class="metric-label">Facts</div></div>
+        <div class="card"><div class="metric" id="totalRules">0+</div><div class="metric-label">Rules</div></div>
+      </div>
+      <h3 class="section-title">Сарын зардлын шинжилгээ</h3>
+      <div class="box"><div class="bar-list" id="costBars"></div></div>
+      <h3 class="section-title">Prolog модулиудын бүтэц</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Модуль</th><th>Агуулга</th><th>Статус</th></tr></thead>
+          <tbody id="moduleTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ANIMALS -->
+    <div id="animals" class="panel">
+      <div class="split-head">
+        <h3 class="section-title" style="margin:0;">Бүртгэлтэй амьтад</h3>
+        <span class="small-note">Хайлт, filter, sort ашиглана.</span>
+      </div>
+      <div class="filter-row">
+        <input id="animalSearch" placeholder="Нэр, төрөл, тэмдэглэлээр хайх..." oninput="renderAnimals()" />
+        <select id="animalFilterType" onchange="renderAnimals()"></select>
+        <select id="animalSort" onchange="renderAnimals()">
+          <option value="name">Нэрээр</option>
+          <option value="age">Насаар</option>
+          <option value="type">Төрлөөр</option>
+        </select>
+      </div>
+      <div id="animalGrid" class="card-grid"></div>
+
+      <h3 class="section-title">Шинэ амьтан нэмэх</h3>
+      <div class="animal-tools box">
+        <div class="form-grid">
+          <input type="text" id="newName" placeholder="Амьтны нэр" />
+          <select id="newType"></select>
+          <select id="newSex">
+            <option value="эр">эр</option>
+            <option value="эм">эм</option>
+          </select>
+          <input type="number" id="newAge" placeholder="Нас" min="0" step="1" />
+          <input type="text" id="newNote" placeholder="Тэмдэглэл (сонголттой)" />
+        </div>
+        <div class="btn-row">
+          <button class="add-btn" onclick="addAnimal()">Амьтан нэмэх</button>
+          <button class="ghost-btn" onclick="clearAnimalForm()">Цэвэрлэх</button>
+        </div>
+        <p class="small-note" style="margin-top:10px;">Нэмсэн амьтан шууд бүх таб дээр харагдана.</p>
+      </div>
+    </div>
+
+    <!-- HEALTH -->
+    <div id="health" class="panel">
+      <h3 class="section-title">Эрүүл мэндийн мэдээлэл</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Төрөл</th><th>Вакцинжуулалт</th><th>Үзлэг</th><th>Анхаарах шинж</th></tr></thead>
+          <tbody id="healthTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FOOD -->
+    <div id="food" class="panel">
+      <h3 class="section-title">Хоол тэжээлийн мэдээлэл</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Амьтан</th><th>Хоол</th><th>Хэмжээ</th><th>Давтамж</th><th>Тайлбар</th></tr></thead>
+          <tbody id="foodTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- COMPAT -->
+    <div id="compat" class="panel">
+      <h3 class="section-title">Амьтдын нийцтэй байдал</h3>
+      <p class="small-note" style="margin-bottom:14px;">Нийцтэй / болгоомжтой / аюултай ангилалтай.</p>
+      <div id="compatGrid" class="compat-grid"></div>
+    </div>
+
+    <!-- QUERY -->
+    <div id="query" class="panel">
+      <h3 class="section-title">Prolog Query Симулятор</h3>
+      <div class="query-box box">
+        <div class="query-grid">
+          <select id="qType" onchange="syncQueryFields()">
+            <option value="cost">Сарын зардал</option>
+            <option value="vaccine">Вакцин жагсаалт</option>
+            <option value="feed">Хоол тэжээл</option>
+            <option value="exercise">Дасгал зөвлөмж</option>
+            <option value="age">Нас хөрвүүлэх</option>
+            <option value="compat">Нийцтэй эсэх</option>
+          </select>
+          <select id="qAnimal"></select>
+        </div>
+        <div id="extraInputs" style="margin-top:12px;"></div>
+        <div class="btn-row">
+          <button class="run-btn" onclick="runQuery()">Query ажиллуулах</button>
+          <button class="ghost-btn" onclick="fillSampleQuery()">Жишээ харах</button>
+        </div>
+      </div>
+      <div class="result-box result-ok" id="qResult">Бэлэн... Query сонгоод ажиллуулаарай.</div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
